@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <getopt.h>
 
+#include "energy_math.h"
+
 static const char *PROG_NAME = "bulb";
 
 void print_help_message(void) {
@@ -21,14 +23,14 @@ int main(int argc, char *const argv[]) {
         hours = 0,
         watts = 0,
         price = 0,
-        bulbs = 1,
-        price_per_day,
-        price_per_month,
-        price_per_year,
-        lifespan = 11000;
+        bulbs = 1, /* Default to 1 bulb per fixture */
+        kwh = 0,
+        cpd = 0,
+        life = 11000;
 
     char *badchar;
 
+    /* Running the program without arguments won't do anything. */
     if (argc == 1) {
         print_help_message();
         exit(0);
@@ -53,10 +55,10 @@ int main(int argc, char *const argv[]) {
                 }
                 break;
             case 'l':
-                lifespan = strtod(optarg, &badchar);
+                life = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
-                    printf("error: lifespan should be a number\n");
+                    printf("error: life should be a number\n");
                     exit(1);
                 }
                 break;
@@ -93,20 +95,19 @@ int main(int argc, char *const argv[]) {
         exit(1);
     }
 
-    price_per_day = (watts / 1000) * price * hours * bulbs;
-    price_per_month = price_per_day * 30;
-    price_per_year = price_per_day * 365;
+    kwh = kilowatt_hours(watts, hours);
+    cpd = cost_per_day(kwh, price);
 
     printf("\n");
-    printf("     %.0f bulbs @ %-5.2f watts\n", bulbs, watts);
-    printf("       %-4.1f hours / day\n", hours);
-    printf("  +-------+---------+--------+\n");
-    printf("  | $/day | $/month | $/year |\n");
-    printf("  +-------+---------+--------+\n");
-    printf("  |$%-6.2f|$%-6.2f  |$%-6.2f |\n", price_per_day, price_per_month, price_per_year);
-    printf("  +-------+---------+--------+\n");
-    printf("  | Lifespan: %-6.2f years   |\n", lifespan / hours / 365);
-    printf("  +--------------------------+\n\n");
+    printf("      %.0f bulbs @ %-5.2f watts\n", bulbs, watts);
+    printf("        %-4.1f hours / day\n", hours);
+    printf("  +--------+---------+--------+\n");
+    printf("  | $/week | $/month | $/year |\n");
+    printf("  +--------+---------+--------+\n");
+    printf("  |$%-6.2f |$%-6.2f  |$%-6.2f |\n", cost_per_week(cpd), cost_per_month(cpd), cost_per_year(cpd));
+    printf("  +--------+---------+--------+\n");
+    printf("  |Expected Life: %-6.2f years|\n", life_in_years(life, hours));
+    printf("  +---------------------------+\n\n");
 
     exit(0);
 }

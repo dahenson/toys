@@ -1,7 +1,22 @@
-CFLAGS=-std=c89 -Wall -pedantic -O3
+CFLAGS = -std=c89 -Wall -pedantic -O3
+TARGET = bulb
 
-bulb: main.c
-	$(CC) $(CFLAGS) $? -o $@
+.PHONY: default all clean
+
+default: $(TARGET)
+all: default
+
+OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
+HEADERS = $(wildcard *.h)
+
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PRECIOUS: $(TARGET) $(OBJECTS)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(OBJECTS) -Wall -o $@
 
 clean:
-	$(RM) -r bulb
+	$(RM) -f $(TARGET)
+	$(RM) -f *.o
