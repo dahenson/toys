@@ -5,18 +5,25 @@
 #include "energy_math.h"
 
 static const char *PROG_NAME = "bulb";
+static const char *VERSION = "0.0.1";
 
-void print_help_message(void) {
-    printf("usage: %s [-hapw]\n", PROG_NAME);
-    printf("\t-h        print the help message\n");
-    printf("\t-a hours  the average hours the bulb is on\n");
-    printf("\t-b bulbs  the number of bulbs in the fixture (default: 1)\n");
-    printf("\t-l life   expected lifespan in hours (default: 11000)\n");
-    printf("\t-p price  the price per kWh\n");
-    printf("\t-w watts  the wattage of the bulb\n\n");
+void
+print_help_message(void)
+{
+    printf("%s - calculate lightbulb fixture cost and lifespan.\n", PROG_NAME);
+    printf("\nUsage: %s [options]\n", PROG_NAME);
+    printf("\t-h          print the help message\n");
+    printf("\t-a hours    the average hours the bulb is on\n");
+    printf("\t-b bulbs    the number of bulbs in the fixture (default: 1)\n");
+    printf("\t-l life     expected lifespan in hours (default: 11000)\n");
+    printf("\t-p price    the price per kWh\n");
+    printf("\t-v version  print the version\n");
+    printf("\t-w watts    the wattage of the bulb\n\n");
 }
 
-int main(int argc, char *const argv[]) {
+int
+main(int argc, char *const argv[])
+{
     int opt;
 
     double
@@ -36,7 +43,7 @@ int main(int argc, char *const argv[]) {
         exit(0);
     }
 
-    while ((opt = getopt(argc, argv, ":ha:b:l:p:w:")) != -1) {
+    while ((opt = getopt(argc, argv, ":ha:b:l:p:va:w:")) != -1) {
         switch (opt){
             case 'a':
                 hours = strtod(optarg, &badchar);
@@ -69,6 +76,10 @@ int main(int argc, char *const argv[]) {
                     printf("error: price should be a number\n");
                     exit(1);
                 }
+                break;
+            case 'v':
+                printf("\n%s - version %s\n", PROG_NAME, VERSION);
+                exit(0);
                 break;
             case 'w':
                 watts = strtod(optarg, &badchar);
