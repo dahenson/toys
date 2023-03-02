@@ -16,6 +16,7 @@ struct bulb {
 struct fixture {
     int bulb_count;
     double hours;
+    double kwh;
 };
 
 static void
@@ -46,12 +47,20 @@ main(int argc, char *const argv[])
 {
     int opt;
 
-    struct bulb b = { 0, 11000, 0 };
-    struct fixture f = { 1, 0 };
+    struct bulb b = {
+        .cost = 0,
+        .life = 11000,
+        .watts = 0
+    };
+
+    struct fixture f = {
+        .bulb_count = 1,
+        .hours = 0
+    };
 
     double
-        cpd = 0,
         kwh = 0,
+        cpd = 0,
         price = 0;
 
     char *badchar;
