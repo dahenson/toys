@@ -7,7 +7,25 @@
 static const char *PROG_NAME = "bulb";
 static const char *VERSION = "0.0.1";
 
-void
+struct bulb {
+    double cost;
+    double life;
+    double watts;
+};
+
+struct fixture {
+    int bulb_count;
+    double hours;
+};
+
+static void
+exit_with_error_message(const char *msg)
+{
+    fprintf(stderr, "%s", msg);
+    exit(EXIT_FAILURE);
+}
+
+static void
 print_help_message(void)
 {
     printf("%s - calculate lightbulb fixture cost and lifespan.\n", PROG_NAME);
@@ -28,99 +46,92 @@ main(int argc, char *const argv[])
 {
     int opt;
 
+    struct bulb b = { 0, 11000, 0 };
+    struct fixture f = { 1, 0 };
+
     double
-        hours = 0,
-        watts = 0,
-        price = 0,
-        bulbs = 1, /* Default to 1 bulb per fixture */
-        kwh = 0,
         cpd = 0,
-        life = 11000;
+        kwh = 0,
+        price = 0;
 
     char *badchar;
 
     /* Running the program without arguments won't do anything. */
     if (argc == 1) {
         print_help_message();
-        exit(0);
+        exit(EXIT_SUCCESS);
     }
 
     while ((opt = getopt(argc, argv, ":ha:b:l:p:va:w:")) != -1) {
         switch (opt){
             case 'a':
-                hours = strtod(optarg, &badchar);
+                f.hours = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
-                    printf("error: hours should be a number\n");
-                    exit(1);
+                    exit_with_error_message("error: hours should be a number\n");
                 }
+
+                if (f.hours < 0 || f.hours > 24) {
+                    exit_with_error_message("error: hours must be between 0 and 24\n");
+                }
+
                 break;
             case 'b':
-                bulbs = strtod(optarg, &badchar);
+                f.bulb_count = strtol(optarg, &badchar, 10);
 
                 if (*badchar != '\0') {
-                    printf("error: bulbs should be a number\n");
-                    exit(1);
+                    exit_with_error_message("error: bulbs should be a number\n");
                 }
                 break;
             case 'l':
-                life = strtod(optarg, &badchar);
+                b.life = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
-                    printf("error: life should be a number\n");
-                    exit(1);
+                    exit_with_error_message("error: life should be a number\n");
                 }
                 break;
             case 'p':
                 price = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
-                    printf("error: price should be a number\n");
-                    exit(1);
+                    exit_with_error_message("error: price should be a number\n");
                 }
                 break;
             case 'v':
                 printf("\n%s - version %s\n", PROG_NAME, VERSION);
-                exit(0);
+                exit(EXIT_SUCCESS);
                 break;
             case 'w':
-                watts = strtod(optarg, &badchar);
+                b.watts = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
-                    printf("error: watts should be a number\n");
-                    exit(1);
+                    exit_with_error_message("error: watts should be a number\n");
                 }
                 break;
             case 'h':
                 print_help_message();
-                exit(0);
-            case '?':
-                print_help_message();
-                exit(1);
+                exit(EXIT_SUCCESS);
+                break;
             default:
                 print_help_message();
-                exit(0);
+                exit(EXIT_SUCCESS);
+                break;
         }
     }
 
-    if (hours < 0 || hours > 24) {
-        printf("error: hours must be between 0 and 24\n");
-        exit(1);
-    }
-
-    kwh = kilowatt_hours(watts, hours);
+    kwh = kilowatt_hours(b.watts, f.hours);
     cpd = cost_per_day(kwh, price);
 
     printf("\n");
-    printf("      %.0f bulbs @ %-5.2f watts\n", bulbs, watts);
-    printf("        %-4.1f hours / day\n", hours);
+    printf("      %.0d bulbs @ %-5.2f watts\n", f.bulb_count, b.watts);
+    printf("        %-4.1f hours / day\n", f.hours);
     printf("  +--------+---------+--------+\n");
     printf("  | $/week | $/month | $/year |\n");
     printf("  +--------+---------+--------+\n");
     printf("  |$%-6.2f |$%-6.2f  |$%-6.2f |\n", cost_per_week(cpd), cost_per_month(cpd), cost_per_year(cpd));
     printf("  +--------+---------+--------+\n");
-    printf("  |Expected Life: %-6.2f years|\n", life_in_years(life, hours));
+    printf("  |Expected Life: %-6.2f years|\n", life_in_years(b.life, f.hours));
     printf("  +---------------------------+\n\n");
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
