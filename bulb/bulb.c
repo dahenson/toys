@@ -1,6 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "energy_math.h"
 
@@ -18,7 +18,9 @@ print_help_message(void)
     printf("\t-l life     expected lifespan in hours (default: 11000)\n");
     printf("\t-p price    the price per kWh\n");
     printf("\t-v version  print the version\n");
-    printf("\t-w watts    the wattage of the bulb\n\n");
+    printf("\t-w watts    the wattage of the bulb\n");
+    printf("\nExample:\n");
+    printf("\n\t%s -a 6 -p 0.10 -w 11\n\n", PROG_NAME);
 }
 
 int
