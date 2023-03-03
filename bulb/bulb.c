@@ -3,21 +3,10 @@
 #include <stdlib.h>
 
 #include "energy_math.h"
+#include "fixture.h"
 
 static const char *PROG_NAME = "bulb";
 static const char *VERSION = "0.0.1";
-
-struct bulb {
-    double cost;
-    double life;
-    double watts;
-};
-
-struct fixture {
-    int bulb_count;
-    double hours;
-    double kwh;
-};
 
 static void
 exit_with_error_message(const char *msg)
@@ -47,21 +36,9 @@ main(int argc, char *const argv[])
 {
     int opt;
 
-    struct bulb b = {
-        .cost = 0,
-        .life = 11000,
-        .watts = 0
-    };
+    struct Fixture f = fixture_new();
 
-    struct fixture f = {
-        .bulb_count = 1,
-        .hours = 0
-    };
-
-    double
-        kwh = 0,
-        cpd = 0,
-        price = 0;
+    double price = 0;
 
     char *badchar;
 
@@ -74,13 +51,13 @@ main(int argc, char *const argv[])
     while ((opt = getopt(argc, argv, ":ha:b:l:p:va:w:")) != -1) {
         switch (opt){
             case 'a':
-                f.hours = strtod(optarg, &badchar);
+                f.hrs = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
                     exit_with_error_message("error: hours should be a number\n");
                 }
 
-                if (f.hours < 0 || f.hours > 24) {
+                if (f.hrs < 0 || f.hrs > 24) {
                     exit_with_error_message("error: hours must be between 0 and 24\n");
                 }
 
@@ -93,7 +70,7 @@ main(int argc, char *const argv[])
                 }
                 break;
             case 'l':
-                b.life = strtod(optarg, &badchar);
+                f.bulb_life = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
                     exit_with_error_message("error: life should be a number\n");
@@ -111,7 +88,7 @@ main(int argc, char *const argv[])
                 exit(EXIT_SUCCESS);
                 break;
             case 'w':
-                b.watts = strtod(optarg, &badchar);
+                f.bulb_watts = strtod(optarg, &badchar);
 
                 if (*badchar != '\0') {
                     exit_with_error_message("error: watts should be a number\n");
@@ -128,19 +105,7 @@ main(int argc, char *const argv[])
         }
     }
 
-    kwh = kilowatt_hours(b.watts, f.hours);
-    cpd = cost_per_day(kwh, price);
-
-    printf("\n");
-    printf("      %.0d bulbs @ %-5.2f watts\n", f.bulb_count, b.watts);
-    printf("        %-4.1f hours / day\n", f.hours);
-    printf("  +--------+---------+--------+\n");
-    printf("  | $/week | $/month | $/year |\n");
-    printf("  +--------+---------+--------+\n");
-    printf("  |$%-6.2f |$%-6.2f  |$%-6.2f |\n", cost_per_week(cpd), cost_per_month(cpd), cost_per_year(cpd));
-    printf("  +--------+---------+--------+\n");
-    printf("  |Expected Life: %-6.2f years|\n", life_in_years(b.life, f.hours));
-    printf("  +---------------------------+\n\n");
+    fixture_pretty_print_stats(&f, price);
 
     exit(EXIT_SUCCESS);
 }
