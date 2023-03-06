@@ -3,35 +3,35 @@
 #include "energy_math.h"
 #include "fixture.h"
 
-struct Fixture
+Fixture
 fixture_new(void)
 {
     struct Fixture f = {
-        .bulb_count = 1,
-        .bulb_cost = 0,
-        .bulb_life = 11000,
-        .bulb_watts = 0,
-        .hrs = 0,
+        0, /* bulb_count */
+        0, /* bulb_cost */
+        0, /* bulb_life */
+        0, /* bulb_watts */
+        0, /* hrs */
     };
 
     return f;
 }
 
 double
-fixture_kwh(struct Fixture *f)
+fixture_kwh(Fixture *f)
 {
     double kwh = f->bulb_count * kilowatt_hours(f->bulb_watts, f->hrs);
     return kwh;
 }
 
 double
-fixture_bulb_life_years (struct Fixture *f)
+fixture_bulb_life_years (Fixture *f)
 {
     return f->bulb_life / f->hrs / 365;
 }
 
 void
-fixture_pretty_print_stats(struct Fixture *f, double energy_price)
+fixture_pretty_print_stats(Fixture *f, double energy_price)
 {
     double kwh = fixture_kwh(f);
     double cpd = cost_per_day(kwh, energy_price);

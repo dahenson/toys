@@ -36,7 +36,7 @@ main(int argc, char *const argv[])
 {
     int opt;
 
-    struct Fixture f = fixture_new();
+    Fixture f = fixture_new();
 
     double price = 0;
 
