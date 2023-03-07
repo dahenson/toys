@@ -1,22 +1,21 @@
-CFLAGS = -std=c89 -Wall -pedantic -O3
-TARGET = bulb
+TARGET := bulb
 
-.PHONY: default all clean
+BUILD_DIR := ./build
 
-default: $(TARGET)
-all: default
+SRCS := $(shell find . -name '*.c')
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
-OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
-HEADERS = $(wildcard *.h)
+CFLAGS := -std=c89 -Wall -pedantic -O3
 
-%.o: %.c $(HEADERS)
+default: $(BUILD_DIR)/$(TARGET)
+
+$(BUILD_DIR)/$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $@
+
+$(BUILD_DIR)/%.c.o: %.c
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-.PRECIOUS: $(TARGET) $(OBJECTS)
-
-$(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) -Wall -o $@
-
+.PHONY: clean
 clean:
-	$(RM) -f $(TARGET)
-	$(RM) -f *.o
+	rm -r $(BUILD_DIR)
